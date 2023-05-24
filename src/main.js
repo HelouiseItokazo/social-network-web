@@ -16,24 +16,29 @@ window.addEventListener('hashchange', () => {
       if (buttonSignIn) {
         buttonSignIn.addEventListener('click', event => {
           event.preventDefault();
-          signIn();
+          const email = document.getElementById("email-login").value;
+          const password = document.getElementById("password-login").value;
+          console.log(email);
+          signIn(email, password);
         })
       }
       break;
     case "#register":
-      main.appendChild(registerScreen());
+      main.appendChild(registerScreen())
       const buttonRegister = document.getElementById("register");
       if (buttonRegister) {
         buttonRegister.addEventListener('click', event => {
           event.preventDefault();
-          registerUser();
+          const emailRegister = document.getElementById("email-register").value;
+          const passwordRegister = document.getElementById("password-register").value;
+          registerUser(emailRegister, passwordRegister);
         });
       }
       break;
     case "#home":
       main.appendChild(homeScreen());
       const buttonSignOut = document.getElementById("sign-out");
-      if(buttonSignOut){
+      if (buttonSignOut) {
         buttonSignOut.addEventListener('click', event => {
           event.preventDefault();
           signOutLogin();

@@ -1,10 +1,7 @@
 import auth from '../src/config/firebase.js'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
-export const registerUser = () => {
-
-    const email = document.getElementById("email-register").value;
-    const password = document.getElementById("password-register").value;
+export const registerUser = (email, password) => {
 
     createUserWithEmailAndPassword(
         auth,
@@ -19,10 +16,7 @@ export const registerUser = () => {
 
 }//endRegisterUser
 
-export const signIn = () => {
-
-    const email = document.getElementById("email-login").value;
-    const password = document.getElementById("password-login").value;
+export const signIn = (email, password) => {
 
     signInWithEmailAndPassword(
         auth,
@@ -41,7 +35,8 @@ export const signOutLogin = () => {
     signOut(auth)
     .then(() => window.location.assign("http://127.0.0.1:4173/"))
     .catch(error => alert(error.message))
-}
+    
+}//endSignOutLogin
 
 
 
