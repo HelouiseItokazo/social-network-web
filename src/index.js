@@ -39,7 +39,7 @@ export const signIn = () => {
 
 export const signOutLogin = () => {
     signOut(auth)
-    .then(() => window.location.assign("http://127.0.0.1:4173/#login"))
+    .then(() => window.location.assign("http://127.0.0.1:4173/"))
     .catch(error => alert(error.message))
 }
 
