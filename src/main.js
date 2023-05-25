@@ -2,7 +2,7 @@ import homeScreen from './pages/home/index.js'
 import loginScreen from './pages/login/index.js'
 import registerScreen from './pages/register/index.js'
 import welcomeScreen from '../src/pages/welcome/index.js'
-import { registerUser, signIn, signOutLogin } from '../src/index.js';
+import { registerUser, signIn, signOutLogin, isTheUserLoggedIn, createPost } from '../src/index.js';
 
 
 const main = document.querySelector('#app');
@@ -18,7 +18,6 @@ window.addEventListener('hashchange', () => {
           event.preventDefault();
           const email = document.getElementById("email-login").value;
           const password = document.getElementById("password-login").value;
-          console.log(email);
           signIn(email, password);
         })
       }
@@ -44,12 +43,22 @@ window.addEventListener('hashchange', () => {
           signOutLogin();
         })
       }
+      const buttonSend = document.getElementById("send");
+      if (buttonSend) {
+        buttonSend.addEventListener('click', event => {
+          event.preventDefault();
+          const post = document.getElementById("post").value;
+          createPost(post);
+          //signOutLogin();
+        })
+      }
       break;
   }
 })
 
 window.addEventListener('load', () => {
   main.appendChild(welcomeScreen());
+  isTheUserLoggedIn();
 })
 
 
