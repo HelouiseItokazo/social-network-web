@@ -1,11 +1,17 @@
-import { 
-    auth, 
+import {
+    auth,
     db,
-    storage 
+    storage
 } from '../service/firebase.js';
-import { 
+import {
+    collection,
     doc,
-    setDoc
+    getDoc,
+    getDocs,
+    query,
+    serverTimestamp,
+    setDoc,
+    where
 } from "firebase/firestore";
 import {
     createUserWithEmailAndPassword,
@@ -14,16 +20,17 @@ import {
     signInWithEmailAndPassword,
     signOut
 } from 'firebase/auth';
-import { 
-    post, 
+import {
+    post,
     userSystem
 } from '../model'
 import { postConverter } from '../model/Post.js';
-import { ref, uploadString} from 'firebase/storage';
+import { userConverter } from '../model/User.js';
+import { ref, uploadString } from 'firebase/storage';
 
 const uploadPhoto = (base64Img) => {
     const storageRef = ref(storage, base64Img, 'data_url')
-    .then((snapshot) => console.log('Uploaded a base64url string!'))
+        .then((snapshot) => console.log('Uploaded a base64url string!'))
 }
 /*
 O objeto FileReader permite que aplicativos da web leiam de forma assíncrona o conteúdo de arquivos 
@@ -49,90 +56,95 @@ const convertBase64 = (file) => {
     });
 };
 
-export const isTheUserLoggedIn = () => {
-
-    auth.onAuthStateChanged(function (user) {
-
-        user = auth.currentUser;
-
-        console.log(auth);
-        console.log(user);
-        
+export const isTheUserLoggedIn = new Promise((resolve, reject) => {
+    auth.onAuthStateChanged((user) => {
         if (user) {
-            const newUser = new userSystem(user.uid, user.displayName, user.email, user.photoURL);
-            console.log(newUser);
+            console.log(user.uid);
+            resolve(user);
+        } else {
+            reject('Nenhum usuário logado');
         }
+    })
+})
 
-    });
+export const alreadyRegisteredUser = async (email) => {
+    try {
+        const ref = doc(db, 'users', `${email}`).withConverter(userConverter);
+        const docSnap = await getDoc(ref);
 
+        return new Promise((resolve, reject) => {
+            if (docSnap.exists()) {
+                const user = docSnap.data();
+                console.log(user.toString());
+                resolve('Chave primária encontrada')
+            } else {
+                console.log("No such document!");
+                reject('Não existe documento que corresponda a este usuário')
+            }
+        })
+    } catch (error) {
+        console.log(error.message);
+    }
 }
 
 export const handleGoogleSingIn = async () => {
-
     try {
-
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
-
     } catch (error) {
-
         console.log(error.message);
-        
     }
-
 }
-
 
 export const createPost = async (textPost) => {
-
     try {
-        
-        let newPost = new post(auth.currentUser.uid, auth.currentUser.displayName, textPost);
-        const docRef = doc(db, "posts", "post").withConverter(postConverter);
-        await setDoc(docRef, newPost)
-        console.log(newPost);
-        console.log("Document written with ID: ", docRef.id);
+        const uid = auth.currentUser.uid;
+        const name = auth.currentUser.displayName;
+
+        const newPost = new post(uid, name, textPost, 0, serverTimestamp());
+
+        const docRef = doc(collection(db, 'posts')).withConverter(postConverter);
+        await setDoc(docRef, newPost);
+
+        console.log('Document written with ID: ', docRef.id);
     } catch (e) {
-        console.error("Error adding document: ", e);
+        console.error('Error adding document: ', e);
     }
 }
 
-export const registerUser = (email, password) => {
-
-    createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-    )
-        .then(() => {
-            location.assign('#home');
-            alert('cadastrado ' + email);
-        })
-        .catch(error => alert(error.message))
-
+export const registerUser = async (uid, name, email, photo) => {
+    try {
+        const newUser = new userSystem(uid, name, email, photo, serverTimestamp());
+        const docRef = doc(db, 'users', `${email}`).withConverter(userConverter);
+        await setDoc(docRef, newUser);
+    } catch (e) {
+        console.error('Error adding document: ', e);
+    }
 }//endRegisterUser
 
-export const signIn = (email, password) => {
+export const authUser = async (email, password) => {
+    try {
+        createUserWithEmailAndPassword(auth, email, password);
+        console.log('usuario autenticado com sucesso');
+    } catch (error) {
+        console.log(error.message);
+    }
+}
 
-    signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-    )
-        .then(() => {
-            location.assign('#home');
-            console.log('Login do email ' + email + ' efetuado');
-        })
-        .catch(error => console.log(error.message))
-
+export const signIn = async (email, password) => {
+    try {
+        signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+        console.log(error.message);
+    }
 }//endSignIn
 
-export const signOutLogin = () => {
-
-    signOut(auth)
-        .then(() => location.assign(""))
-        .catch(error => alert(error.message))
-
+export const signOutLogin = async () => {
+    try {
+        signOut(auth);
+    } catch (error) {
+        console.log(error.message);
+    }
 }//endSignOutLogin
 
 

@@ -1,6 +1,9 @@
-import { 
-    handleGoogleSingIn, 
-    signIn  
+import {
+    alreadyRegisteredUser,
+    handleGoogleSingIn,
+    isTheUserLoggedIn,
+    registerUser,
+    signIn
 } from '../../controller';
 
 export default () => {
@@ -19,58 +22,41 @@ export default () => {
 
     container.innerHTML = template;
 
-    const buttonSignIn = container.querySelector("#sign-in");
+    const buttonSignIn = container.querySelector('#sign-in');
 
-    if (buttonSignIn) {
+    buttonSignIn.addEventListener('click', (event) => {
 
-        buttonSignIn.addEventListener('click', event => {
+        event.preventDefault();
 
-            event.preventDefault();
+        const email = container.querySelector('#email-login').value;
+        const password = container.querySelector('#password-login').value;
 
-            try {
+        signIn(email, password)
+            .then(() => window.location.hash = '#home')
+            .catch((error) => console.log(error.message))
 
-                const email = container.querySelector("#email-login").value;
-                const password = container.querySelector("#password-login").value;
+    })//endAddEventListener
 
-                signIn(email, password);
+    const imgGoogle = container.querySelector('#img-google');
 
-            } catch(error){
+    imgGoogle.addEventListener('click', (event) => {
 
+        event.preventDefault();
+
+        handleGoogleSingIn()
+            .then((user) => isTheUserLoggedIn)
+            .then((user) => alreadyRegisteredUser(user.email))
+            .then(() => window.location.hash = '#home')
+            .then(() => console.log('JA TA CADASTRADO'))
+            .catch(async (error) => {
+                console.log('VOU CADASTRAR')
+                const user = await isTheUserLoggedIn;
+                await registerUser(user.uid, user.displayName, user.email, user.photoURL);
+                window.location.hash = '#home'
                 console.log(error.message);
+            })
 
-            }//endTryCatch
-
-        })//endAddEventListener
-
-    }//endIf
-
-    const imgGoogle = container.querySelector("#img-google");
-
-    if(imgGoogle){
-
-        imgGoogle.addEventListener('click', async event => {
-            event.preventDefault();
-            try {
-
-                await handleGoogleSingIn();
-                event.preventDefault();
-                console.log("esperei 2");
-            
-         
-            }catch(error){
-
-                console.log(error.message);
-
-            }
-                
-            
-       
-
-            
-
-        })//endAddEventListener
-
-    }//endIf
+    })//endAddEventListener
 
     return container;
 

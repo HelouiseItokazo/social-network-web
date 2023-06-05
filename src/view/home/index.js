@@ -1,36 +1,39 @@
-import { signOutLogin,  createPost } from '../../controller';
+import { signOutLogin, createPost } from '../../controller';
 
 export default () => {
 
-    const container = document.createElement('section');
+  const container = document.createElement('section');
 
-    const template = `
+  const template = `
         <h1>Home</h1>
         <input id="post" type="text">
         <button id="send">Publicar</button>
         <button id="sign-out">Voltar</button>
     `;
 
-    container.innerHTML = template;
+  container.innerHTML = template;
 
-      const buttonSend = container.querySelector("#send");
+  const buttonSend = container.querySelector("#send");
 
-      if (buttonSend) {
-        buttonSend.addEventListener('click', event => {
-          event.preventDefault();
-          const post = container.querySelector("#post").value;
-          createPost(post);
-        })
-      }
+  buttonSend.addEventListener('click', async () => {
+    const post = container.querySelector("#post");
+    createPost(post.value)
+    .then(() => post.value = "")
+    .catch((error) => console.log(error.message))   
+  })
 
-      const buttonSignOut = container.querySelector("#sign-out");
+  const buttonSignOut = container.querySelector("#sign-out");
 
-      if (buttonSignOut) {
-        buttonSignOut.addEventListener('click', event => {
-          event.preventDefault();
-          signOutLogin();
-        })
-      }
+  buttonSignOut.addEventListener('click', async (event) => {
 
-    return container;
+    event.preventDefault();
+  
+    signOutLogin()
+    .then(() => window.location.hash = '')
+    .catch((error) => console.log(error));
+   
+  })
+
+  return container;
+
 }//endArrowFunction

@@ -6,30 +6,36 @@ import {
 } from './view'
 import { isTheUserLoggedIn } from './controller';
 
-
 const main = document.querySelector('#app');
 
 window.addEventListener('hashchange', () => {
-  main.innerHTML = "";
+  main.innerHTML = '';
   switch (window.location.hash) {
-    case " ":
+    case '':
       main.appendChild(welcomeScreen());
       break;
-    case "#login":
+    case '#login':
       main.appendChild(loginScreen());
       break;
-    case "#register":
+    case '#register':
       main.appendChild(registerScreen())
       break;
-    case "#home":
+    case '#home':
       main.appendChild(homeScreen());
       break;
-    default:
-      main.appendChild(welcomeScreen());
   }
 })
 
-window.addEventListener('load', isTheUserLoggedIn);
+window.addEventListener('load', (event) => {
+  event.preventDefault()
+  isTheUserLoggedIn
+    .then(() => main.appendChild(homeScreen()))
+    .catch((error) => {
+      main.appendChild(welcomeScreen());
+      console.log(error.message);
+    })
+
+});
 
 
 
